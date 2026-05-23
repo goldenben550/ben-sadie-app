@@ -25,18 +25,16 @@ jobs:
       - name: Install and Build
         run: npm install && npm run build
 
-
-      - name: Deploy to GitHub Pages
+- name: Deploy to GitHub Pages
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p gh-pages
-          cp -r dist/* gh-pages/
-          cd gh-pages
+          cd dist
+          touch .nojekyll
           git init
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
           git add .
-          git commit -m "Deploy"
-          git push -f https://x-access-token:$GH_TOKEN@github.com/${{ github.repository }}.git HEAD:gh-pages
-
+          git commit -m "Deploy to GitHub Pages"
+          git remote add origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git
+          git push -f origin HEAD:gh-pages
