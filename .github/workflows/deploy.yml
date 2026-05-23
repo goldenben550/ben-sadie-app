@@ -4,13 +4,8 @@ on:
   push:
     branches: [ main ]
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
@@ -21,15 +16,17 @@ jobs:
         with:
           node-version: '20'
       
-      - name: Install dependencies
-        run: npm install
+      - name: Install and Build
+        run: npm install && npm run build
       
-      - name: Build
-        run: npm run build
-      
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-          publish_dir: ./dist
-          cname: false
+      - name: Deploy to GitHub Pages
+        run: |
+          mkdir -p gh-pages
+          cp -r dist/* gh-pages/
+          cd gh-pages
+          git init
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add .
+          git commit -m "Deploy"
+          git push -f https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:gh-pages
