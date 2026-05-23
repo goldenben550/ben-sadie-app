@@ -13,38 +13,34 @@ export default function BucketList() {
   useEffect(() => {
     fetchItems()
 
-    // Subscribe to real-time changes
-    const subscription = supabase
-      .channel('bucket_list_changes')
+    const channel = supabase
+      .channel('bucket_list')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'bucket_list' },
-        (payload) => {
+        () => {
           fetchItems()
         }
       )
       .subscribe()
 
     return () => {
-      subscription.unsubscribe()
+      supabase.removeChannel(channel)
     }
   }, [])
 
   const fetchItems = async () => {
-    try {
-      setLoading(true)
-      const { data, error } = await supabase
-        .from('bucket_list')
-        .select('*')
-        .order('created_at', { ascending: false })
+    const { data, error } = await supabase
+      .from('bucket_list')
+      .select('*')
+      .order('created_at', { ascending: false })
 
-      if (error) throw error
-      setItems(data || [])
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
+    if (error) {
+      setError(error.message)
+      return
     }
+    setItems(data || [])
+    setLoading(false)
   }
 
   const addItem = async (e) => {
@@ -99,6 +95,7 @@ export default function BucketList() {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 max-w-2xl">
       <h2 className="text-2xl font-bold mb-6">Things we want to do together</h2>
+
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
