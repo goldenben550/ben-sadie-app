@@ -19,6 +19,7 @@ jobs:
       - name: Install and Build
         run: npm install && npm run build
 
+
       - name: Deploy to GitHub Pages
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -32,3 +33,4 @@ jobs:
           git add .
           git commit -m "Deploy"
           git push -f https://x-access-token:$GH_TOKEN@github.com/${{ github.repository }}.git HEAD:gh-pages
+
